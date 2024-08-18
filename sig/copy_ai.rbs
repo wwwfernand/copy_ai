@@ -1,0 +1,162 @@
+module CopyAi
+  VERSION: Gem::Version
+
+  class Authenticator
+    @api_key: String
+    AUTHENTICATION_HEADER: "x-copy-ai-api-key"
+    attr_accessor api_key: String
+
+    def initialize: (api_key: String) -> void
+    def header: () -> ::Hash[String, String]
+  end
+
+  class Client
+    @api_key: String
+    @api_endpoint: String
+    @connection: Connection
+    @request_builder: RequestBuilder
+    @response_parser: ResponseParser
+    @workflow_id: String
+    @authenticator: Authenticator
+
+    extend Forwardable
+    attr_reader api_key: String
+    attr_reader api_endpoint: String
+    attr_reader workflow_id: String
+
+    def initialize: (api_key: String, api_endpoint: String, ?open_timeout: Integer, ?read_timeout: Integer, ?write_timeout: Integer, ?debug_output: untyped) -> void
+    def get: () -> Hash[String, String]
+    def post: (body: Hash[Symbol, untyped]) -> Hash[String, String]
+    def api_key=: (String api_key) -> void
+    def api_endpoint=: (String api_endpoint) -> void
+
+    private
+    def initialize_workflow_id: () -> void
+    def initialize_authenticator: () -> void
+    def execute_request: (:get | :post http_method, ?body: Hash[Symbol, untyped]?) -> Hash[String, String]
+  end
+
+  module Webhook
+    extend ::CopyAi::Webhook
+    EVENT_TYPES: ::Array[String]
+    WEBHOOK_URL: "https://api.copy.ai/api/webhook"
+
+    def register: (Client client, url: String, event_type: String, ?workflow_id: String?) -> Hash[String, String]
+
+    private
+    def validate!: (event_type: String) -> nil
+  end
+
+  class Connection
+    @open_timeout: Integer
+    @read_timeout: Integer
+    @write_timeout: Integer
+    @debug_output: untyped
+
+    extend Forwardable
+    DEFAULT_OPEN_TIMEOUT: 60
+    DEFAULT_READ_TIMEOUT: 60
+    DEFAULT_WRITE_TIMEOUT: 60
+    DEFAULT_DEBUG_OUTPUT: untyped
+    NETWORK_ERRORS: ::Array[(singleton(Errno::ECONNREFUSED) | singleton(Errno::ECONNRESET) | singleton(Net::OpenTimeout) | singleton(Net::ReadTimeout) | singleton(OpenSSL::SSL::SSLError))]
+    attr_accessor open_timeout: Integer
+    attr_accessor read_timeout: Integer
+    attr_accessor write_timeout: Integer
+    attr_accessor debug_output: untyped
+
+    def initialize: (?open_timeout: Integer, ?read_timeout: Integer, ?write_timeout: Integer, ?debug_output: untyped) -> void
+    def perform: (request: Net::HTTPRequest) -> Net::HTTPResponse
+
+    private
+    def build_http_client: (String host, Integer port) -> Net::HTTP
+    def configure_http_client: (Net::HTTP http_client) -> Net::HTTP
+  end
+
+  class RequestBuilder
+    DEFAULT_HEADERS: { "Content-Type" => "application/json" }
+    HTTP_METHODS: Hash[Symbol, (singleton(Net::HTTP::Get) | singleton(Net::HTTP::Post))]
+
+    def build: (http_method: Symbol, uri: URI::Generic, authenticator: Authenticator, ?body: Hash[Symbol, untyped]?) -> Net::HTTPRequest
+
+    private
+    def create_request: (http_method: Symbol, uri: URI::Generic, body: Hash[Symbol, untyped]?) -> Net::HTTPRequest
+    def add_headers: (request: Net::HTTPRequest, header: Hash[String, String]) -> void
+  end
+
+  class ResponseParser
+    ERROR_MAP: Hash[Integer, singleton(BadGateway) | singleton(BadRequest) | singleton(ConnectionException) | singleton(Forbidden) | singleton(GatewayTimeout) | singleton(Gone) | singleton(InternalServerError) | singleton(NotAcceptable) | singleton(NotFound) | singleton(PayloadTooLarge) | singleton(ServiceUnavailable) | singleton(Unauthorized) | singleton(UnprocessableEntity)]
+    JSON_CONTENT_TYPE_REGEXP: ::Regexp
+
+    def parse: (response: Net::HTTPResponse) -> (nil | untyped)
+
+    private
+    def error: (Net::HTTPResponse response) -> HTTPError
+    def error_class: (Net::HTTPResponse response) -> (singleton(BadGateway) | singleton(BadRequest) | singleton(ConnectionException) | singleton(Forbidden) | singleton(GatewayTimeout) | singleton(Gone) | singleton(InternalServerError) | singleton(NotAcceptable) | singleton(NotFound) | singleton(PayloadTooLarge) | singleton(ServiceUnavailable) | singleton(Unauthorized) | singleton(UnprocessableEntity))
+    def json?: (Net::HTTPResponse response) -> bool
+  end
+
+  class Error < StandardError
+  end
+
+  class ClientError < HTTPError
+  end
+
+  class BadGateway < ClientError
+  end
+
+  class BadRequest < ClientError
+  end
+
+  class ConnectionException < ClientError
+  end
+
+  class HTTPError < Error
+    @response: Net::HTTPResponse
+    @code: String
+
+    JSON_CONTENT_TYPE_REGEXP: ::Regexp
+    attr_reader response: Net::HTTPResponse
+    attr_reader code: String
+
+    def initialize: (response: Net::HTTPResponse) -> void
+    def error_message: (Net::HTTPResponse response) -> String
+    def message_from_json_response: (Net::HTTPResponse response) -> String
+    def json?: (Net::HTTPResponse response) -> bool
+  end
+
+  class Forbidden < ClientError
+  end
+
+  class GatewayTimeout < ClientError
+  end
+
+  class Gone < ClientError
+  end
+
+  class InternalServerError < ServerError
+  end
+
+  class NetworkError < Error
+  end
+
+  class NotAcceptable < ClientError
+  end
+
+  class NotFound < ClientError
+  end
+
+  class PayloadTooLarge < ClientError
+  end
+
+  class ServerError < HTTPError
+  end
+
+  class ServiceUnavailable < ServerError
+  end
+
+  class Unauthorized < ClientError
+  end
+
+  class UnprocessableEntity < ClientError
+  end
+end
