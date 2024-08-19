@@ -11,7 +11,7 @@ module CopyAi
       post: Net::HTTP::Post
     }.freeze
 
-    def build(http_method:, uri:, authenticator:, body: nil)
+    def build(http_method:, uri:, authenticator:, body:)
       raise ArgumentError, "Missing Credentials" unless authenticator
 
       request = create_request(http_method:, uri:, body:)
@@ -33,7 +33,6 @@ module CopyAi
 
     def add_headers(request:, header:)
       DEFAULT_HEADERS.merge(header).each do |key, value|
-        request.delete(key)
         request.add_field(key, value)
       end
     end

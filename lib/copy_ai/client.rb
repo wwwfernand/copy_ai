@@ -29,7 +29,7 @@ module CopyAi
     end
 
     def get
-      execute_request(:get)
+      execute_request(:get, body: nil)
     end
 
     def post(body:)
@@ -37,15 +37,11 @@ module CopyAi
     end
 
     def api_key=(api_key)
-      raise ArgumentError, "Missing Credentials" if api_key.nil? || api_key.empty?
-
       @api_key = api_key
       initialize_authenticator
     end
 
     def api_endpoint=(api_endpoint)
-      raise ArgumentError, "Missing Credentials" if api_endpoint.nil? || api_endpoint.empty?
-
       @api_endpoint = api_endpoint
       initialize_workflow_id
     end
@@ -53,7 +49,11 @@ module CopyAi
     private
 
     def initialize_workflow_id
-      @workflow_id = api_endpoint.split("/")[-2]
+      raise ArgumentError, "Missing Credentials" if api_endpoint.nil? || api_endpoint.empty?
+
+      @workflow_id = api_endpoint.split("/").at(-2)
+
+      raise ArgumentError, "Invalid Credentials" if workflow_id.nil?
     end
 
     def initialize_authenticator
@@ -62,9 +62,7 @@ module CopyAi
       @authenticator = Authenticator.new(api_key:)
     end
 
-    def execute_request(http_method, body: nil)
-      raise ArgumentError, "Missing Credentials" if api_endpoint.nil? || api_endpoint.empty?
-
+    def execute_request(http_method, body:)
       uri = URI(api_endpoint)
       request = @request_builder.build(http_method:, uri:, body:, authenticator: @authenticator)
       response = @connection.perform(request:)

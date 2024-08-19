@@ -7,7 +7,7 @@ module CopyAi
     attr_accessor api_key: String
 
     def initialize: (api_key: String) -> void
-    def header: () -> ::Hash[String, String]
+    def header: () -> Hash[String, String]
   end
 
   class Client
@@ -25,23 +25,23 @@ module CopyAi
     attr_reader workflow_id: String
 
     def initialize: (api_key: String, api_endpoint: String, ?open_timeout: Integer, ?read_timeout: Integer, ?write_timeout: Integer, ?debug_output: untyped) -> void
-    def get: () -> Hash[String, String]
-    def post: (body: Hash[Symbol, untyped]) -> Hash[String, String]
+    def get: () -> Hash[String, untyped]
+    def post: (body: Hash[Symbol, untyped]) -> Hash[String, untyped]
     def api_key=: (String api_key) -> void
     def api_endpoint=: (String api_endpoint) -> void
 
     private
     def initialize_workflow_id: () -> void
     def initialize_authenticator: () -> void
-    def execute_request: (:get | :post http_method, ?body: Hash[Symbol, untyped]?) -> Hash[String, String]
+    def execute_request: (:get | :post http_method, body: Hash[Symbol, untyped]?) -> Hash[String, untyped]
   end
 
   module Webhook
     extend ::CopyAi::Webhook
-    EVENT_TYPES: ::Array[String]
+    EVENT_TYPES: Array[String]
     WEBHOOK_URL: "https://api.copy.ai/api/webhook"
 
-    def register: (Client client, url: String, event_type: String, ?workflow_id: String?) -> Hash[String, String]
+    def register: (Client client, url: String, event_type: String, ?workflow_id: String?) -> Hash[String, untyped]
 
     private
     def validate!: (event_type: String) -> nil
@@ -58,7 +58,7 @@ module CopyAi
     DEFAULT_READ_TIMEOUT: 60
     DEFAULT_WRITE_TIMEOUT: 60
     DEFAULT_DEBUG_OUTPUT: untyped
-    NETWORK_ERRORS: ::Array[(singleton(Errno::ECONNREFUSED) | singleton(Errno::ECONNRESET) | singleton(Net::OpenTimeout) | singleton(Net::ReadTimeout) | singleton(OpenSSL::SSL::SSLError))]
+    NETWORK_ERRORS: Array[(singleton(Errno::ECONNREFUSED) | singleton(Errno::ECONNRESET) | singleton(Net::OpenTimeout) | singleton(Net::ReadTimeout) | singleton(OpenSSL::SSL::SSLError))]
     attr_accessor open_timeout: Integer
     attr_accessor read_timeout: Integer
     attr_accessor write_timeout: Integer
@@ -68,7 +68,7 @@ module CopyAi
     def perform: (request: Net::HTTPRequest) -> Net::HTTPResponse
 
     private
-    def build_http_client: (String host, Integer port) -> Net::HTTP
+    def build_http_client: (untyped host, untyped port) -> Net::HTTP
     def configure_http_client: (Net::HTTP http_client) -> Net::HTTP
   end
 
@@ -76,7 +76,7 @@ module CopyAi
     DEFAULT_HEADERS: { "Content-Type" => "application/json" }
     HTTP_METHODS: Hash[Symbol, (singleton(Net::HTTP::Get) | singleton(Net::HTTP::Post))]
 
-    def build: (http_method: Symbol, uri: URI::Generic, authenticator: Authenticator, ?body: Hash[Symbol, untyped]?) -> Net::HTTPRequest
+    def build: (http_method: Symbol, uri: URI::Generic, authenticator: Authenticator, body: Hash[Symbol, untyped]?) -> Net::HTTPRequest
 
     private
     def create_request: (http_method: Symbol, uri: URI::Generic, body: Hash[Symbol, untyped]?) -> Net::HTTPRequest

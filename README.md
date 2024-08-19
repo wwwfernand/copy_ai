@@ -28,10 +28,20 @@ copy_ai_client = CopyAi::Client.new(**copy_ai_credentials)
 # Register webhook
 # url: your site webhook URL
 # event_type: https://docs.copy.ai/reference/register-webhook#event-types
-ads_client = CopyAi::Webook.register(copy_ai_client, url: 'https://cloud-asm.com/webhook', event_type: 'workflowRun.completed')
+# optional workflow_id: If a workflow ID is not specified, you will receive events for all workflows in your workspace.
+response = CopyAi::Webook.register(copy_ai_client, url: 'https://cloud-asm.com/webhook', event_type: 'workflowRun.completed', workflow_id: <workflow-id>)
+# {
+    "status": "success",
+    "data": {
+      "id": "<id of webhook>",
+      "url": "<https://mywebsite.com/webhook>",
+      "eventType": "workflowRun.completed",
+      "workflowId": "<workflow-id>"
+    }
+  }
 
 # Starting a Workflow Run
-post = copy_ai_client.post({
+post = copy_ai_client.post(body: {
   startVariables: {
 	  "Input 1": "<Inputs vary depending on the workflow used.>",
 	  "Input 2": "<The best way to see an example is to try it!>"
@@ -40,7 +50,7 @@ post = copy_ai_client.post({
     "api": true
 	}
 })
-# { "status": "success", "data": { "id": "<run_id>" } }
+# { "status": "success", "data": { "id": "<run-id>" } }
 
 # Tracking / Poll for Progress
 copy_ai_client.get
@@ -48,7 +58,7 @@ copy_ai_client.get
     "status": "success",
     "data":
     {
-      "id": "<run_id>",
+      "id": "<run-id>",
       "input":
       { 
         "Input 1": "Inputs vary depending on the workflow used.",
@@ -68,8 +78,8 @@ copy_ai_client.get
 # When the run is complete, the status will change to COMPLETE and a POST request will be sent to the registered webhooks to notify of the workflow's completion.
 # {
     "type": "workflowRun.completed",
-    "workflowRunId": "<run_id>",
-    "workflowId": "<workflow_id>",
+    "workflowRunId": "<run-id>",
+    "workflowId": "<workflow-id>",
     "result":
     {
       "Output 1": "<Outputs vary depending on the workflow used.>",
@@ -119,7 +129,7 @@ Pull requests will only be accepted if they meet all the following criteria:
 
        bundle exec rake rubocop
 
-3. 100% C0 code coverage.
+3. 100% LOC code coverage.
 
        bundle exec rake test
 

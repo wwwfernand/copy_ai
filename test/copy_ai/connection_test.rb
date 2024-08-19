@@ -53,12 +53,18 @@ module CopyAi
       assert_equal $stderr, http_client.instance_variable_get(:@debug_output)
     end
 
-    def test_perform
+    def test_valid_perform
       stub_request(:get, TEST_API_ENDPOINT).to_return(body: STUB_CLIENT_SUCCESS_GET_RESPONSE)
       request = Net::HTTP::Get.new(@uri)
       @connection.perform(request:)
 
       assert_requested :get, TEST_API_ENDPOINT
+    end
+
+    def test_invalid_url_api_endpoint_credential
+      exception = assert_raises(ArgumentError) { @connection.perform(request: Net::HTTP::Get.new(URI("/123/456/789"))) }
+
+      assert_equal "not an HTTP URI", exception.message
     end
 
     def test_network_error

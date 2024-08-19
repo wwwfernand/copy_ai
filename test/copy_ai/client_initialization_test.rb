@@ -21,10 +21,28 @@ module CopyAi
       assert_equal "Missing Credentials", exception.message
     end
 
-    def test_missing_api_endpoint_credential
-      exception = assert_raises(ArgumentError) { Client.new(api_key: TEST_API_KEY, api_endpoint: "").get }
+    def test_nil_api_key_credential
+      exception = assert_raises(ArgumentError) { Client.new(api_key: nil, api_endpoint: TEST_API_ENDPOINT) }
 
       assert_equal "Missing Credentials", exception.message
+    end
+
+    def test_missing_api_endpoint_credential
+      exception = assert_raises(ArgumentError) { Client.new(api_key: TEST_API_KEY, api_endpoint: "") }
+
+      assert_equal "Missing Credentials", exception.message
+    end
+
+    def test_nil_api_endpoint_credential
+      exception = assert_raises(ArgumentError) { Client.new(api_key: TEST_API_KEY, api_endpoint: nil) }
+
+      assert_equal "Missing Credentials", exception.message
+    end
+
+    def test_invalid_api_endpoint_credential
+      exception = assert_raises(ArgumentError) { Client.new(api_key: TEST_API_KEY, api_endpoint: "wrong-endpoint") }
+
+      assert_equal "Invalid Credentials", exception.message
     end
 
     def test_setting_api_key_reinitializes_authenticator
@@ -41,10 +59,28 @@ module CopyAi
       assert_equal "Missing Credentials", exception.message
     end
 
+    def test_api_key_empty_error_response
+      exception = assert_raises(ArgumentError) { @client.api_key = "" }
+
+      assert_equal "Missing Credentials", exception.message
+    end
+
     def test_api_endpoint_nil_error_response
       exception = assert_raises(ArgumentError) { @client.api_endpoint = nil }
 
       assert_equal "Missing Credentials", exception.message
+    end
+
+    def test_api_endpoint_empty_error_response
+      exception = assert_raises(ArgumentError) { @client.api_endpoint = "" }
+
+      assert_equal "Missing Credentials", exception.message
+    end
+
+    def test_api_endpoint_invalid_error_response
+      exception = assert_raises(ArgumentError) { @client.api_endpoint = "wrong-endpoint" }
+
+      assert_equal "Invalid Credentials", exception.message
     end
 
     def test_initialize_with_default_connection_options

@@ -31,12 +31,8 @@ module CopyAi
     end
 
     def perform(request:)
-      host = request.uri.host
-      port = request.uri.port
-      raise BadGateway, "Invalid URL" if host.nil? || port.nil?
-
-      http_client = build_http_client(host, port)
-      http_client.use_ssl = request.uri.scheme.eql?("https")
+      http_client = build_http_client(request.uri.host, request.uri.port)
+      http_client.use_ssl = true
       http_client.request(request)
     rescue *NETWORK_ERRORS => e
       raise NetworkError, "Network error: #{e}"
