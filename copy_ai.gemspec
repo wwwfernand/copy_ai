@@ -23,6 +23,6 @@ Gem::Specification.new do |spec|
     Dir["{bin,lib}/**/*", "MIT-LICENSE", "Rakefile", "*.md"]
   end
 
-  spec.add_dependency "rails", "~> 7.1", ">= 7.1.3.4"
+  spec.add_dependency "rails", ">= 7.1.3.4", "< 9.0"
   spec.metadata["rubygems_mfa_required"] = "true"
 end
